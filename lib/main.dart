@@ -1,56 +1,69 @@
-
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdfx/pdfx.dart';
+
 void main() {
-  runApp(const MaterialApp(
-    title: 'Syncfusion PDF Viewer Demo',
-    home: HomePage(),
-  ));
+  runApp(const MyApp());
 }
 
-/// Represents Homepage for Navigation
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PDF Viewer App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const MyHomePage(),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
-  void openFile(PlatformFile file){
-    OpenFile.open(file.path);
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  String? filePath;
+
+  Future<void> pickPdfFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        filePath = result.files.first.path;
+      });
+    }
   }
-  Future<File> saveFilePermanently(PlatformFile file)async{
-final appStorage=await getApplicationDocumentsDirectory();
-final newFile=File("${appStorage.path}/${file.name}");
-return File(file.path!).copy(newFile.path);
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Syncfusion Flutter PDF Viewer'),
-
+        title: const Text('PDF Viewer'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_open),
+            onPressed: pickPdfFile,
+          )
+        ],
       ),
-      body: Center(
-        child: ElevatedButton(onPressed: ()async{
-          final result= await FilePicker.platform.pickFiles();
-if(result==null) return;
-final file=result.files.first;
-print("Name:${file.name}");
-print("Bytes:${file.bytes}");
-print("Size:${file.size}");
-print("Extexsion:${file.extension}");
-print("Path:${file.path}");
-print("Path:${file.identifier}");
-openFile(file);
-      final newFile=    saveFilePermanently(file);
-        }, child: const Text("Pick File")),
-      ),
+      body: filePath != null
+          ? PdfView(
+        controller: PdfController(
+          document: PdfDocument.openFile(filePath!),
+        ),
+      )
+          : const Center(child: Text('No PDF file selected!')),
     );
   }
 }

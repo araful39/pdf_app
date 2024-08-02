@@ -39,6 +39,7 @@ dependencies:
   file_picker:
   open_file:
   path_provider:
+  pdfx:
 
 dev_dependencies:
   flutter_test:
