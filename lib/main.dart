@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 
 void main() {
@@ -30,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String? filePath;
+  List<String> list=[];
 
   Future<void> pickPdfFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -40,7 +39,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (result != null && result.files.isNotEmpty) {
       setState(() {
-        filePath = result.files.first.path;
+       var filePath = result.files.first.path;
+
+       list.add(filePath!);
+       print("FilePath: ${filePath.runtimeType}");
+       print("FilePath: ${list.runtimeType}");
       });
     }
   }
@@ -57,13 +60,17 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: filePath != null
-          ? PdfView(
-        controller: PdfController(
-          document: PdfDocument.openFile(filePath!),
-        ),
-      )
-          : const Center(child: Text('No PDF file selected!')),
+      body:list.isNotEmpty?ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context,index){
+        return  PdfView(
+          scrollDirection: Axis.vertical,
+            controller: PdfController(
+              document: PdfDocument.openFile(list[index])));
+
+
+           }):Center(child: Text("No Selected"))
+
     );
   }
 }
