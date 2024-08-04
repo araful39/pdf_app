@@ -41,6 +41,7 @@ dependencies:
   path_provider:
   pdfx:
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

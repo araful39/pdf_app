@@ -1,76 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:pdfx/pdfx.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MaterialApp(
+    title: 'Syncfusion PDF Viewer Demo',
+    home: HomePage(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+/// Represents Homepage for Navigation
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PDF Viewer App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
-    );
-  }
+  _HomePage createState() => _HomePage();
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+class _HomePage extends State<HomePage> {
+  final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<String> list=[];
-
-  Future<void> pickPdfFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      setState(() {
-       var filePath = result.files.first.path;
-
-       list.add(filePath!);
-       print("FilePath: ${filePath.runtimeType}");
-       print("FilePath: ${list.runtimeType}");
-      });
-    }
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('PDF Viewer'),
-        actions: [
+        title: const Text('Syncfusion Flutter PDF Viewer'),
+        actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.file_open),
-            onPressed: pickPdfFile,
-          )
+            icon: const Icon(
+              Icons.bookmark,
+              color: Colors.white,
+              semanticLabel: 'Bookmark',
+            ),
+            onPressed: () {
+              _pdfViewerKey.currentState?.openBookmarkView();
+            },
+          ),
         ],
       ),
-      body:list.isNotEmpty?ListView.builder(
-          itemCount: list.length,
-          itemBuilder: (context,index){
-        return  PdfView(
-          scrollDirection: Axis.vertical,
-            controller: PdfController(
-              document: PdfDocument.openFile(list[index])));
-
-
-           }):Center(child: Text("No Selected"))
-
+      body: SfPdfViewer.network(
+        'https://cdn.syncfusion.com/content/PDFViewer/flutter-succinctly.pdf',
+        key: _pdfViewerKey,
+      ),
     );
   }
 }
